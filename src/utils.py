@@ -13,9 +13,19 @@ import glob as glob
 import json
 from xml.etree import ElementTree as et
 
-from utils import get_device
+def get_classes():
+    with open('./classes.json', 'r') as f:
+        y = json.loads(f.read())
+    return y['classes']
 
-DEVICE = get_device()
+def get_num_of_classes():
+    with open('./classes.json', 'r') as f:
+        y = json.loads(f.read())
+    return len(y['classes'])
+
+def get_device():
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu') 
+    return device
 
 class Resize(Dataset):
     def __init__(self, dir_path, width, height, classes, transforms=None):
@@ -156,11 +166,12 @@ def get_valid_transform():
 
 # Helps to check whether the tranformed images along with the corresponding labels are correct or not.
 def show_tranformed_image(train_loader):
+    device = get_device()
     if len(train_loader) > 0:
         for i in range(1):
             images, targets = next(iter(train_loader))
-            images = list(image.to(DEVICE) for image in images)
-            targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
+            images = list(image.to(device) for image in images)
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
             boxes = targets[i]['boxes'].cpu().numpy().astype(np.int32)
             sample = images[i].permute(1, 2, 0).cpu().numpy()
             for box in boxes:
@@ -171,18 +182,3 @@ def show_tranformed_image(train_loader):
             cv2.imshow('Transformed image', sample)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-
-
-def get_classes():
-    with open('./classes.json', 'r') as f:
-        y = json.loads(f.read())
-    return y['classes']
-
-def get_num_of_classes():
-    with open('./classes.json', 'r') as f:
-        y = json.loads(f.read())
-    return len(y['classes'])
-
-def get_device():
-    DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu') 
-    return DEVICE
