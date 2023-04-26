@@ -74,7 +74,7 @@ if __name__ == '__main__':
 	# arg parser initailizing  
 	parser = argparse.ArgumentParser(description="List fish in aquarium.")
 	parser.add_argument("--model", type=str, required= True, help="Inference model path")
-	parser.add_argument("--threshold", type=str, required= False, help="Detection threshold", default=0.8)
+	parser.add_argument("--threshold", type=float, required= False, help="Detection threshold", default=0.8)
 	parser.add_argument("--image", type=str, required= False, help="Test Image Path", default=200)
 	args = parser.parse_args()
 
