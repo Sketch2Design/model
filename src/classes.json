@@ -1,0 +1,5 @@
+{
+	"classes": [
+    	"background", "rectangle", "frame_rectangle", "ellipse", "frame_ellipse"
+	]
+}
