@@ -25,7 +25,7 @@ def load():
 
     # --------------------------------------------------------- DATASET DOWNLOAD AND EXTRACT----------------------------------------------------
     # download the dataset into the data set directory
-    with open(args.path / "archive.zip", "wb") as f:
+    with open(ARCHIVE_FILE_PATH, "wb") as f:
             request = requests.get(args.url)
             print("Downloading...")
             f.write(request.content)
