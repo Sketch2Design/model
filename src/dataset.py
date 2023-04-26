@@ -109,8 +109,8 @@ def load():
 
 if __name__ == '__main__':
     # arg parser initailizing
-    parser = argparse.ArgumentParser(description="List fish in aquarium.")
-    parser.add_argument("--url", type=str, required= False, help="Download URL of the dataset")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--url", type=str, required= True, help="Download URL of the dataset")
     parser.add_argument("--path", type=str, required= True, help="Dataset directory path")
     parser.add_argument("--split", type=float, required= False, help="Train Test split", default=0.2)
     parser.add_argument("--batch", type=int, required= False, help="Train Test split", default=4)
