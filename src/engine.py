@@ -7,7 +7,7 @@ import os
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 
-from utils import Loss, get_num_of_classes, get_device, loader_fn, resize, get_classes
+from utils import Loss, get_num_of_classes, get_device, loader_fn, resize, get_classes, Resize, get_train_transform, get_test_transform
 from model import create_model
 
 plt.style.use('ggplot')
@@ -82,12 +82,6 @@ def test(test_data_loader, model):
 
 if __name__ == '__main__':
 
-    abspath = os.path.abspath(__file__)
-    dname = os.path.dirname(abspath)
-    dname_list = dname.split('/')
-    root = "/".join(dname_list[:(len(dname_list) - 1)])
-    os.chdir(root)
-
 	# arg parser initailizing
     engine_parser = argparse.ArgumentParser()
     engine_parser.add_argument("--model", type=str, required= True, help="Export model name")
@@ -98,17 +92,27 @@ if __name__ == '__main__':
     engine_parser.add_argument("--batch", type=int, required= False, help="Train Test split", default=4)
     args = engine_parser.parse_args()
 
+   
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
-    os.chdir(root)
-
-    RESIZE_TO = 512
-    TEST_PATH = os.path.join("dataset", "test")
-    TRAIN_PATH = os.path.join("dataset", "train")
-    CLASSES = get_classes()
+    os.chdir(dname)
+    dname_list = dname.split('/')
+    dname.pop()
+    dname.extend(['dataset', 'train'])
+    train_path = "/".join(dname_list)
+    dname.pop()
+    dname.append('test')
+    test_path = "/".join(dname_list)
 
     # resize dataset
-    train_dataset, test_dataset = resize()
+    RESIZE_TO = 512
+    CLASSES = get_classes()
+
+    train_dataset = Resize(train_path, RESIZE_TO, RESIZE_TO, CLASSES, get_train_transform())
+    test_dataset = Resize(test_path, RESIZE_TO, RESIZE_TO, CLASSES, get_test_transform())
+   
+    print(f"Number of training samples: {len(train_dataset)}")
+    print(f"Number of validation samples: {len(test_dataset)}\n")
 
     # prepare data loaders
     train_loader = loader_fn(True,train_dataset,args.batch)

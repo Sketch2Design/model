@@ -115,21 +115,11 @@ class Resize(Dataset):
     def __len__(self):
         return len(self.all_images)
 
-
-# Resize the image 
-def resize():
-    train_dataset = Resize(TRAIN_PATH, RESIZE_TO, RESIZE_TO, CLASSES, get_train_transform())
-    test_dataset = Resize(TEST_PATH, RESIZE_TO, RESIZE_TO, CLASSES, get_valid_transform())
-   
-    print(f"Number of training samples: {len(train_dataset)}")
-    print(f"Number of validation samples: {len(test_dataset)}\n")
-
-    return train_dataset, test_dataset
    
 
-def loader_fn(train, datset, batch):
+def loader_fn(train, dataset, batch):
     loader = DataLoader(
-        datset,
+        dataset,
         batch_size=batch,
         shuffle=train,
         num_workers=2,
@@ -188,7 +178,7 @@ def get_train_transform():
         'label_fields': ['labels']
     })
 # define the validation transforms
-def get_valid_transform():
+def get_test_transform():
     return A.Compose([
         ToTensorV2(p=1.0),
     ], bbox_params={
