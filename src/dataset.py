@@ -116,6 +116,12 @@ if __name__ == '__main__':
     parser.add_argument("--batch", type=int, required= False, help="Train Test split", default=4)
     args = parser.parse_args()
 
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    dname_list = dname.split('/')
+    root = "/".join(dname_list[:(len(dname_list) - 1)])
+    os.chdir(root)
+
     RESIZE_TO = 512
     CLASSES = get_classes()
     

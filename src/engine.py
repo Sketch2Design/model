@@ -81,6 +81,12 @@ def test(test_data_loader, model):
 
 if __name__ == '__main__':
     
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    dname_list = dname.split('/')
+    root = "/".join(dname_list[:(len(dname_list) - 1)])
+    os.chdir(root)
+
 	# arg parser initailizing
     parser = argparse.ArgumentParser(description="List fish in aquarium.")
     parser.add_argument("--model", type=str, required= True, help="Export model name")
