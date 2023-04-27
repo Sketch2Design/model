@@ -7,7 +7,7 @@ import os
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 
-from utils import Loss, get_num_of_classes, get_device, loader_fn, get_classes, Resize, get_train_transform, get_test_transform
+from utils import Loss, get_num_of_classes, get_device, loader_fn, get_classes, Resize, get_train_transform, get_test_transform, show_tranformed_image
 from model import create_model
 
 plt.style.use('ggplot')
@@ -118,6 +118,8 @@ if __name__ == '__main__':
     # prepare data loaders
     train_loader = loader_fn(True,train_dataset,args.batch)
     test_loader = loader_fn(False,test_dataset,args.batch)
+
+    show_tranformed_image(train_loader)
     
     # initialize the model and move to the computation device
     model = create_model(num_classes=get_num_of_classes())

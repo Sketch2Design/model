@@ -52,6 +52,47 @@ def inference(image_path):
 		draw_boxes = boxes.copy()
 		# get all the predicited class names
 		pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
+
+		fig = plt.figure()
+
+        # add axes to the image
+		ax = fig.add_axes([0, 0, 1, 1])
+
+        # read and plot the image
+		image = Image.fromarray(sample)
+		plt.imshow(image)
+
+        # Iterate over all the bounding boxes
+		for box in boxes:
+			xmin, ymin, xmax, ymax = box
+			w = xmax - xmin
+			h = ymax - ymin
+
+            # add bounding boxes to the image
+			box = patches.Rectangle(
+                (xmin, ymin), w, h, edgecolor="red", facecolor="none"
+            )
+		
+		ax.add_patch(box)
+
+		if pred_classes is not None:
+			rx, ry = box.get_xy()
+			cx = rx + box.get_width()/2.0
+			cy = ry + box.get_height()/8.0
+			l = ax.annotate(
+				pred_classes[i],
+				(cx, cy),
+				fontsize=8,
+				fontweight="bold",
+				color="white",
+				ha='center',
+				va='center'
+			)
+			l.set_bbox(
+				dict(facecolor='red', alpha=0.5, edgecolor='red')
+			)
+		
+		plt.axis('off')
 		
 		# draw the bounding boxes and write the class name on top of it
 		for j, box in enumerate(draw_boxes):
