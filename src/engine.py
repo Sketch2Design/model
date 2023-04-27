@@ -1,8 +1,10 @@
 import torch
 
-import matplotlib.pyplot as plt
 import argparse
 import time
+import os
+
+import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 
 from utils import Loss, get_num_of_classes, get_device
@@ -80,7 +82,7 @@ def test(test_data_loader, model):
 
 
 if __name__ == '__main__':
-    
+
     abspath = os.path.abspath(__file__)
     dname = os.path.dirname(abspath)
     dname_list = dname.split('/')
@@ -133,6 +135,8 @@ if __name__ == '__main__':
         
         # start timer and carry out training and testing
         start = time.time()
+
+        
         train_loss = train(train_loader, model)
         test_loss = test(test_loader, model)
         

@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 
 import numpy as np
 
@@ -14,14 +14,13 @@ import json
 from xml.etree import ElementTree as et
 
 def get_classes():
-    with open('./classes.json', 'r') as f:
+    with open('classes.json', 'r') as f:
         y = json.loads(f.read())
     return y['classes']
 
 def get_num_of_classes():
-    with open('./classes.json', 'r') as f:
-        y = json.loads(f.read())
-    return len(y['classes'])
+    num = len(get_classes())
+    return num
 
 def get_device():
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu') 
@@ -141,6 +140,16 @@ class Loss:
 #  To handle the data loading as different images may have different number of objects and to handle varying size tensors as well.
 def collate_fn(batch):
     return tuple(zip(*batch))
+
+def loader_fn(train, datset, batch):
+    loader = DataLoader(
+        datset,
+        batch_size=batch,
+        shuffle=train,
+        num_workers=2,
+        collate_fn=collate_fn
+    )
+    return loader
 
 # define the training tranforms
 def get_train_transform():
