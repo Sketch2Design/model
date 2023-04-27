@@ -11,7 +11,6 @@ from utils import Loss, get_num_of_classes, get_device, loader_fn, get_classes, 
 from model import create_model
 
 plt.style.use('ggplot')
-DEVICE = get_device()
 
 # function for running training iterations
 def train(train_data_loader, model):
@@ -73,7 +72,7 @@ def test(test_data_loader, model):
         test_loss_list.append(loss_value)
         test_loss_hist.send(loss_value)
         
-        val_itr += 1
+        test_itr += 1
         # update the loss value beside the progress bar for each iteration
         prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
         
@@ -81,6 +80,8 @@ def test(test_data_loader, model):
 
 
 if __name__ == '__main__':
+
+    DEVICE = get_device()
 
 	# arg parser initailizing
     engine_parser = argparse.ArgumentParser()
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     train_loss_hist = Loss()
     test_loss_hist = Loss()
     train_itr = 1
-    val_itr = 1
+    test_itr = 1
     
     # train and testing loss lists to store loss values of all...
     train_loss_list = []

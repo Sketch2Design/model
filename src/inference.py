@@ -72,7 +72,7 @@ def inference(image_path):
 if __name__ == '__main__':
         
 	# arg parser initailizing  
-	parser = argparse.ArgumentParser(description="List fish in aquarium.")
+	parser = argparse.ArgumentParser()
 	parser.add_argument("--model", type=str, required= True, help="Inference model path")
 	parser.add_argument("--threshold", type=float, required= False, help="Detection threshold", default=0.8)
 	parser.add_argument("--image", type=str, required= False, help="Test Image Path", default=200)
@@ -80,6 +80,6 @@ if __name__ == '__main__':
 
 	DEVICE = get_device()
 
-	inference()
+	inference(args.image)
 	
     
