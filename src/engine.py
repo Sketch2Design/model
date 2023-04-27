@@ -43,7 +43,7 @@ def train(train_data_loader, model):
         train_itr += 1
     
         # update the loss value beside the progress bar for each iteration
-        prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
+        prog_bar.set_description(desc=f"Loss: {loss_value:.4f} Iter: {train_itr} ")
         
     return train_loss_list
 
@@ -74,7 +74,7 @@ def test(test_data_loader, model):
         
         test_itr += 1
         # update the loss value beside the progress bar for each iteration
-        prog_bar.set_description(desc=f"Loss: {loss_value:.4f}")
+        prog_bar.set_description(desc=f"Loss: {loss_value:.4f} Iter: {test_itr}")
         
     return test_loss_list
 

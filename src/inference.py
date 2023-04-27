@@ -24,7 +24,6 @@ def inference(image_path):
 	CLASSES = get_classes()
 
 	# get the image file name for saving output later on
-	image_path = args.image
 	image_name = image_path.split('/')[-1].split('.')[0]
 	image = cv2.imread(image_path)
 	orig_image = image.copy()
