@@ -114,7 +114,30 @@ class Resize(Dataset):
         return image_resized, target
     def __len__(self):
         return len(self.all_images)
-    
+
+
+# Resize the image 
+def resize():
+    train_dataset = Resize(TRAIN_PATH, RESIZE_TO, RESIZE_TO, CLASSES, get_train_transform())
+    test_dataset = Resize(TEST_PATH, RESIZE_TO, RESIZE_TO, CLASSES, get_valid_transform())
+   
+    print(f"Number of training samples: {len(train_dataset)}")
+    print(f"Number of validation samples: {len(test_dataset)}\n")
+
+    return train_dataset, test_dataset
+   
+
+def loader_fn(train, datset, batch):
+    loader = DataLoader(
+        datset,
+        batch_size=batch,
+        shuffle=train,
+        num_workers=2,
+        collate_fn=collate_fn
+    )
+    return loader
+
+
 
 # this class keeps track of the training and validation loss values...
 class Loss:

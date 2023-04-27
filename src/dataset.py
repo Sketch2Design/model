@@ -1,3 +1,5 @@
+from torch.utils.data import DataLoader
+
 import os
 import argparse
 import shutil
@@ -7,7 +9,7 @@ from pathlib import Path
 
 import zipfile
 
-from utils import Resize, get_train_transform, get_valid_transform, get_classes, collate_fn
+from utils import get_classes
 
 def split():
     
@@ -68,60 +70,30 @@ def split():
             file_name = str(path).split("/")
             shutil.move(path,os.path.join(TRAIN_PATH, file_name[3]))
 
-# Resize the image 
-def resize():
-    train_dataset = Resize(TRAIN_PATH, RESIZE_TO, RESIZE_TO, CLASSES, get_train_transform())
-    test_dataset = Resize(TEST_PATH, RESIZE_TO, RESIZE_TO, CLASSES, get_valid_transform())
 
-   
-    print(f"Number of training samples: {len(train_dataset)}")
-    print(f"Number of validation samples: {len(test_dataset)}\n")
+if __name__ == '__main__':
+    # arg parser initailizing
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--url", type=str, required= True, help="Download URL of the dataset")
+    parser.add_argument("--path", type=str, required= True, help="Dataset directory path")
+    parser.add_argument("--split", type=float, required= False, help="Train Test split", default=0.2)
+    args = parser.parse_args()
 
-    return train_dataset, test_dataset
-   
+    ARCHIVE_FILE_PATH = os.path.join(args.path, "archive.zip")
+    ALL_DATASET_PATH = os.path.join(args.path, "all")
+    ANNOTATION_PATH = os.path.join(args.path, "all", "Annotations")
+    IMAGE_PATH = os.path.join(args.path, "all", "images")
+    TEST_PATH = os.path.join(args.path, "test")
+    TRAIN_PATH = os.path.join(args.path, "train")
 
-def loader_fn(train, datset, batch):
-    loader = DataLoader(
-        datset,
-        batch_size=batch,
-        shuffle=train,
-        num_workers=2,
-        collate_fn=collate_fn
-    )
-    return loader
+    RESIZE_TO = 512
+    CLASSES = get_classes()
 
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    dname_list = dname.split('/')
+    root = "/".join(dname_list[:(len(dname_list) - 1)])
+    os.chdir(root)
 
-
-# arg parser initailizing
-parser = argparse.ArgumentParser()
-parser.add_argument("--url", type=str, required= True, help="Download URL of the dataset")
-parser.add_argument("--path", type=str, required= True, help="Dataset directory path")
-parser.add_argument("--split", type=float, required= False, help="Train Test split", default=0.2)
-parser.add_argument("--batch", type=int, required= False, help="Train Test split", default=4)
-args = parser.parse_args()
-
-ARCHIVE_FILE_PATH = os.path.join(args.path, "archive.zip")
-ALL_DATASET_PATH = os.path.join(args.path, "all")
-ANNOTATION_PATH = os.path.join(args.path, "all", "Annotations")
-IMAGE_PATH = os.path.join(args.path, "all", "images")
-TEST_PATH = os.path.join(args.path, "test")
-TRAIN_PATH = os.path.join(args.path, "train")
-
-RESIZE_TO = 512
-CLASSES = get_classes()
-
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-dname_list = dname.split('/')
-root = "/".join(dname_list[:(len(dname_list) - 1)])
-os.chdir(root)
-
-# split dataset
-split()
-
-# resize dataset
-train_dataset, test_dataset = resize()
-
-# prepare data loaders
-train_loader = loader_fn(True,train_dataset,args.batch)
-test_loader = loader_fn(False,test_dataset,args.batch)
+    # split dataset
+    split()

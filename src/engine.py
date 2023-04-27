@@ -90,13 +90,26 @@ if __name__ == '__main__':
     os.chdir(root)
 
 	# arg parser initailizing
-    parser = argparse.ArgumentParser(description="List fish in aquarium.")
-    parser.add_argument("--model", type=str, required= True, help="Export model name")
-    parser.add_argument("--export", type=str, required= True, help="Export model path")
-    parser.add_argument("--lr", type=float, required= False, help="Learning Rate", default=0.001)
-    parser.add_argument("--epochs", type=int, required= False, help="Number of epochs", default=1000)
-    parser.add_argument("--ckpt", type=int, required= False, help="Number of epochs", default=200)
-    args = parser.parse_args()
+    engine_parser = argparse.ArgumentParser()
+    engine_parser.add_argument("--model", type=str, required= True, help="Export model name")
+    engine_parser.add_argument("--export", type=str, required= True, help="Export model path")
+    engine_parser.add_argument("--lr", type=float, required= False, help="Learning Rate", default=0.001)
+    engine_parser.add_argument("--epochs", type=int, required= False, help="Number of epochs", default=1000)
+    engine_parser.add_argument("--ckpt", type=int, required= False, help="Number of epochs", default=200)
+    parser.add_argument("--batch", type=int, required= False, help="Train Test split", default=4)
+    args = engine_parser.parse_args()
+
+    RESIZE_TO = 512
+    TEST_PATH = os.path.join(args.path, "test")
+    TRAIN_PATH = os.path.join(args.path, "train")
+    CLASSES = get_classes()
+
+    # resize dataset
+    train_dataset, test_dataset = resize()
+
+    # prepare data loaders
+    train_loader = loader_fn(True,train_dataset,args.batch)
+    test_loader = loader_fn(False,test_dataset,args.batch)
     
     # initialize the model and move to the computation device
     model = create_model(num_classes=get_num_of_classes())
@@ -136,7 +149,7 @@ if __name__ == '__main__':
         # start timer and carry out training and testing
         start = time.time()
 
-        
+
         train_loss = train(train_loader, model)
         test_loss = test(test_loader, model)
         
