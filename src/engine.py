@@ -7,9 +7,8 @@ import os
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 
-from utils import Loss, get_num_of_classes, get_device
+from utils import Loss, get_num_of_classes, get_device, loader_fn, resize, get_classes
 from model import create_model
-from dataset import train_loader, test_loader
 
 plt.style.use('ggplot')
 DEVICE = get_device()
@@ -96,12 +95,16 @@ if __name__ == '__main__':
     engine_parser.add_argument("--lr", type=float, required= False, help="Learning Rate", default=0.001)
     engine_parser.add_argument("--epochs", type=int, required= False, help="Number of epochs", default=1000)
     engine_parser.add_argument("--ckpt", type=int, required= False, help="Number of epochs", default=200)
-    parser.add_argument("--batch", type=int, required= False, help="Train Test split", default=4)
+    engine_parser.add_argument("--batch", type=int, required= False, help="Train Test split", default=4)
     args = engine_parser.parse_args()
 
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(root)
+
     RESIZE_TO = 512
-    TEST_PATH = os.path.join(args.path, "test")
-    TRAIN_PATH = os.path.join(args.path, "train")
+    TEST_PATH = os.path.join("dataset", "test")
+    TRAIN_PATH = os.path.join("dataset", "train")
     CLASSES = get_classes()
 
     # resize dataset
@@ -133,6 +136,12 @@ if __name__ == '__main__':
     
     # name to save the trained model with
     MODEL_NAME = args.model
+
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    dname_list = dname.split('/')
+    root = "/".join(dname_list[:(len(dname_list) - 1)])
+    os.chdir(root)
   
     # start the training epochs
     for epoch in range(args.epochs):
