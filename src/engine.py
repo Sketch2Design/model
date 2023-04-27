@@ -7,7 +7,7 @@ import os
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 
-from utils import Loss, get_num_of_classes, get_device, loader_fn, resize, get_classes, Resize, get_train_transform, get_test_transform
+from utils import Loss, get_num_of_classes, get_device, loader_fn, get_classes, Resize, get_train_transform, get_test_transform
 from model import create_model
 
 plt.style.use('ggplot')
@@ -97,11 +97,11 @@ if __name__ == '__main__':
     dname = os.path.dirname(abspath)
     os.chdir(dname)
     dname_list = dname.split('/')
-    dname.pop()
-    dname.extend(['dataset', 'train'])
+    dname_list.pop()
+    dname_list.extend(['dataset', 'train'])
     train_path = "/".join(dname_list)
-    dname.pop()
-    dname.append('test')
+    dname_list.pop()
+    dname_list.append('test')
     test_path = "/".join(dname_list)
 
     # resize dataset
