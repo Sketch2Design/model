@@ -175,7 +175,7 @@ if __name__ == '__main__':
         end = time.time()
         print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
         if (epoch+1) % args.ckpt == 0: # save model after every n epochs
-            torch.save(model.state_dict(), f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
+            torch.save(model, f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
             print('SAVING MODEL COMPLETED...\n')
         
         if (epoch+1) % args.ckpt == 0: # save loss plots after n epochs
@@ -196,6 +196,6 @@ if __name__ == '__main__':
             test_ax.plot(test_loss, color='red')
             test_ax.set_xlabel('iterations')
             test_ax.set_ylabel('test loss')
-            torch.save(model.state_dict(), f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
+            torch.save(model, f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
         
         plt.close('all')

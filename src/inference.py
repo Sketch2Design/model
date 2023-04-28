@@ -27,10 +27,12 @@ def inference():
 	os.chdir(root)
 
 	# load the model and the trained weights
-	model = create_model(num_classes=len(CLASSES)).to(DEVICE)
-	model.load_state_dict(torch.load(
-		args.model, map_location=DEVICE
-	))
+	# model = create_model(num_classes=len(CLASSES)).to(DEVICE)
+	# model.load_state_dict(torch.load(
+	# 	args.model, map_location=DEVICE
+	# ))
+
+	model = torch.load(args.model)
 	model.eval()
         
 
