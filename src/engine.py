@@ -37,6 +37,9 @@ def train(train_data_loader, model):
         train_loss_hist.send(loss_value)
         
         losses.backward()
+
+        clipping_value = 1 
+        torch.nn.utils.clip_grad_norm(params, clipping_value)
         
         optimizer.step()
         
@@ -118,8 +121,6 @@ if __name__ == '__main__':
     # prepare data loaders
     train_loader = loader_fn(True,train_dataset,args.batch)
     test_loader = loader_fn(False,test_dataset,args.batch)
-
-    show_tranformed_image(train_loader)
     
     # initialize the model and move to the computation device
     model = create_model(num_classes=get_num_of_classes())
