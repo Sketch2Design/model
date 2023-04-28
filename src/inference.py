@@ -10,6 +10,7 @@ from google.colab.patches import cv2_imshow
 
 import argparse
 import glob as glob
+import os
 
 from utils import get_classes, get_device, get_num_of_classes
 from model import create_model
@@ -17,7 +18,13 @@ from model import create_model
 
 
 
-def inference(image_path):
+def inference():
+
+	abspath = os.path.abspath(__file__)
+	dname = os.path.dirname(abspath)
+	dname_list = dname.split('/')
+	root = "/".join(dname_list[:(len(dname_list) - 1)])
+	os.chdir(root)
 
 	# load the model and the trained weights
 	model = create_model(num_classes=get_num_of_classes()).to(DEVICE)
@@ -87,6 +94,6 @@ if __name__ == '__main__':
 
 	DEVICE = get_device()
 
-	inference(args.image)
+	inference()
 	
     
