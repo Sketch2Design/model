@@ -1,5 +1,9 @@
 import torch
+import torchvision
 from torch.utils.data import Dataset, DataLoader
+from torchvision.io import read_image
+from torchvision.utils import draw_bounding_boxes
+import torchvision.transforms.functional as transform
 
 import numpy as np
 
@@ -10,6 +14,7 @@ import cv2
 import matplotlib.pyplot as plt
 from matplotlib import patches
 from PIL import Image
+from google.colab.patches import cv2_imshow
 
 
 import os
@@ -198,28 +203,24 @@ def show_tranformed_image(train_loader):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         boxes = targets[i]['boxes'].cpu().numpy().astype(np.int32)
+
+        # sample = images[i].permute(1, 2, 0).cpu().numpy()
+        # image = Image.fromarray((sample * 255).astype(np.uint8))
+        # image = transform.to_tensor(image).to(torch.uint8)
+
+        # # Iterate over all the bounding boxes
+        # for box in boxes:
+        #     box = torch.tensor(box, dtype=torch.int)
+        #     box = box.unsqueeze(0)
+        #     img= draw_bounding_boxes(image, box, width=3, colors=(255,255,0))
+        #     img = torchvision.transforms.ToPILImage()(img)
+        #     img.show()
+
         sample = images[i].permute(1, 2, 0).cpu().numpy()
- 
-        fig = plt.figure()
-
-        # add axes to the image
-        ax = fig.add_axes([0, 0, 1, 1])
-
-        # read and plot the image
-        image = Image.fromarray(sample)
-        plt.imshow(image)
-
-        # Iterate over all the bounding boxes
         for box in boxes:
-            xmin, ymin, xmax, ymax = box
-            w = xmax - xmin
-            h = ymax - ymin
+            cv2.rectangle(sample,
+                        (box[0], box[1]),
+                        (box[2], box[3]),
+                        (0, 0, 255), 2)
+        cv2_imshow(img)
 
-            # add bounding boxes to the image
-            box = patches.Rectangle(
-                (xmin, ymin), w, h, edgecolor="red", facecolor="none"
-            )
-
-            ax.add_patch(box)
-
-        plt.axis('off')

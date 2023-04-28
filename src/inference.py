@@ -2,6 +2,9 @@ import torch
 import numpy as np
 
 import cv2
+import matplotlib.pyplot as plt
+from matplotlib import patches
+from PIL import Image
 
 import argparse
 import glob as glob
@@ -94,19 +97,8 @@ def inference(image_path):
 		
 		plt.axis('off')
 		
-		# draw the bounding boxes and write the class name on top of it
-		for j, box in enumerate(draw_boxes):
-			cv2.rectangle(orig_image,
-						(int(box[0]), int(box[1])),
-						(int(box[2]), int(box[3])),
-						(0, 0, 255), 2)
-			cv2.putText(orig_image, pred_classes[j], 
-						(int(box[0]), int(box[1]-5)),
-						cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 
-						2, lineType=cv2.LINE_AA)
-		cv2.imshow('Prediction', orig_image)
+		
 	print('TEST PREDICTIONS COMPLETE')
-	cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
