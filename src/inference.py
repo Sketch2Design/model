@@ -35,8 +35,8 @@ def inference():
         
 
 	# get the image file name for saving output later on
-	image_name = image_path.split('/')[-1].split('.')[0]
-	image = cv2.imread(image_path)
+	image_name = args.image.split('/')[-1].split('.')[0]
+	image = cv2.imread(args.image)
 	orig_image = image.copy()
 	# BGR to RGB
 	image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB).astype(np.float32)
@@ -60,7 +60,7 @@ def inference():
 		boxes = outputs[0]['boxes'].data.numpy()
 		scores = outputs[0]['scores'].data.numpy()
 		# filter out boxes according to `detection_threshold`
-		boxes = boxes[scores >= detection_threshold].astype(np.int32)
+		boxes = boxes[scores >= args.threshold].astype(np.int32)
 		draw_boxes = boxes.copy()
 		# get all the predicited class names
 		pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
