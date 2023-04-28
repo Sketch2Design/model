@@ -5,6 +5,8 @@ import cv2
 import matplotlib.pyplot as plt
 from matplotlib import patches
 from PIL import Image
+from google.colab.patches import cv2_imshow
+
 
 import argparse
 import glob as glob
@@ -46,56 +48,29 @@ def inference(image_path):
 
 	# load all detection to CPU for further operations
 	outputs = [{k: v.to('cpu') for k, v in t.items()} for t in outputs]
+
 	# carry further only if there are detected boxes
 	if len(outputs[0]['boxes']) != 0:
 		boxes = outputs[0]['boxes'].data.numpy()
 		scores = outputs[0]['scores'].data.numpy()
 		# filter out boxes according to `detection_threshold`
-		boxes = boxes[scores >= args.threshold].astype(np.int32)
+		boxes = boxes[scores >= detection_threshold].astype(np.int32)
 		draw_boxes = boxes.copy()
 		# get all the predicited class names
 		pred_classes = [CLASSES[i] for i in outputs[0]['labels'].cpu().numpy()]
 
-		fig = plt.figure()
-
-        # add axes to the image
-		ax = fig.add_axes([0, 0, 1, 1])
-
-        # read and plot the image
-		image = Image.fromarray(sample)
-		plt.imshow(image)
-
-        # Iterate over all the bounding boxes
-		for box in boxes:
-			xmin, ymin, xmax, ymax = box
-			w = xmax - xmin
-			h = ymax - ymin
-
-            # add bounding boxes to the image
-			box = patches.Rectangle(
-                (xmin, ymin), w, h, edgecolor="red", facecolor="none"
-            )
-		
-		ax.add_patch(box)
-
-		if pred_classes is not None:
-			rx, ry = box.get_xy()
-			cx = rx + box.get_width()/2.0
-			cy = ry + box.get_height()/8.0
-			l = ax.annotate(
-				pred_classes[i],
-				(cx, cy),
-				fontsize=8,
-				fontweight="bold",
-				color="white",
-				ha='center',
-				va='center'
-			)
-			l.set_bbox(
-				dict(facecolor='red', alpha=0.5, edgecolor='red')
-			)
-		
-		plt.axis('off')
+		# draw the bounding boxes and write the class name on top of it
+		for j, box in enumerate(draw_boxes):
+			cv2.rectangle(orig_image,
+						(int(box[0]), int(box[1])),
+						(int(box[2]), int(box[3])),
+						(0, 0, 255), 2)
+			cv2.putText(orig_image, pred_classes[j], 
+						(int(box[0]), int(box[1]-5)),
+						cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 
+						2, lineType=cv2.LINE_AA)
+		cv2_imshow(orig_image)
+		cv2.imwrite(f"{image_name}.jpg", orig_image,)
 		
 		
 	print('TEST PREDICTIONS COMPLETE')
