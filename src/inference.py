@@ -27,13 +27,12 @@ def inference():
 	os.chdir(root)
 
 	# load the model and the trained weights
-	model = create_model(num_classes=get_num_of_classes()).to(DEVICE)
+	model = create_model(num_classes=len(CLASSES)).to(DEVICE)
 	model.load_state_dict(torch.load(
 		args.model, map_location=DEVICE
 	))
 	model.eval()
         
-	CLASSES = get_classes()
 
 	# get the image file name for saving output later on
 	image_name = image_path.split('/')[-1].split('.')[0]
@@ -93,6 +92,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	DEVICE = get_device()
+	CLASSES = get_classes()
 
 	inference()
 	
