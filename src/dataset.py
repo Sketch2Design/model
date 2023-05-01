@@ -35,10 +35,10 @@ def split():
 
     # create a set of random integers from 1 to number of datasets
     random_set = set()
-    random.seed(42)
+    random.seed(41)
     start, end = 1, int(args.split * number_of_datasets) 
     for _ in range(start, (end + 4)):
-        num = random.randint(1,number_of_datasets)
+        num = random.randint(1,(number_of_datasets - 1))
         random_set.add(num)
         if len(random_set) == int(end): break
 
