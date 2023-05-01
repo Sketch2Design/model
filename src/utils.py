@@ -44,7 +44,9 @@ class Resize(Dataset):
         self.classes = classes
         
         # get all the image paths in sorted order
-        self.image_paths = glob.glob(f"{self.dir_path}/*.jpg")
+        self.image_paths = []
+        for ext in ('*.png', '*.jpg'):
+            self.image_paths.extend(glob.glob(f"{self.dir_path}/{ext}"))
         self.all_images = [image_path.split('/')[-1] for image_path in self.image_paths]
         self.all_images = sorted(self.all_images)
         
