@@ -1,6 +1,6 @@
 import torch
 from torch.utils.tensorboard import SummaryWriter
-import torchmetrics
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
 import argparse
 import time
@@ -90,7 +90,7 @@ def test(test_data_loader, model):
         
         test_itr += 1
         # update the loss value beside the progress bar for each iteration
-        prog_bar.set_description(desc=f"Loss: {loss_value:.4f} Iter: {test_itr}")
+        prog_bar.set_description(desc=f"mAP: {mAP:.4f} Iter: {test_itr}")
 
     mean_ap = mAP.compute()
         
@@ -152,8 +152,8 @@ if __name__ == '__main__':
     # define the learning rate scheduler
     warmup_epochs = 7
     warmup_factor = 0.01
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 40, 60, 80], gamma=0.1)
-    warmup_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda epoch: epoch / warmup_epochs * warmup_factor)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 40, 60, 80], gamma=0.1)
+    warmup_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda epoch: epoch / warmup_epochs * warmup_factor)
     
     # initialize the Loss store class
     train_loss_hist = Loss()
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     train_loss_list = []
 
     #metrics initialization
-    mAP = torchmetrics.MeanAveragePrecision()
+    mAP = MeanAveragePrecision()
     
     # name to save the trained model with
     MODEL_NAME = args.model
@@ -183,7 +183,6 @@ if __name__ == '__main__':
         
         # reset the training and testing loss histories for the current epoch
         train_loss_hist.reset()
-        test_loss_hist.reset()
         
         # create two subplots, one for each, training and testing
         figure_1, train_ax = plt.subplots()
@@ -215,9 +214,9 @@ if __name__ == '__main__':
             train_ax.plot(train_loss, color='blue')
             train_ax.set_xlabel('iterations')
             train_ax.set_ylabel('train loss')
-            test_ax.plot(test_loss, color='red')
+            test_ax.plot(mean_ap, color='red')
             test_ax.set_xlabel('iterations')
-            test_ax.set_ylabel('test loss')
+            test_ax.set_ylabel('mAP')
             figure_1.savefig(f"{args.export}/train_loss_{epoch+1}.png")
             figure_2.savefig(f"{args.export}/test_loss_{epoch+1}.png")
             print('SAVING PLOTS COMPLETE...')
@@ -226,9 +225,9 @@ if __name__ == '__main__':
             train_ax.plot(train_loss, color='blue')
             train_ax.set_xlabel('iterations')
             train_ax.set_ylabel('train loss')
-            test_ax.plot(test_loss, color='red')
+            test_ax.plot(mean_ap, color='red')
             test_ax.set_xlabel('iterations')
-            test_ax.set_ylabel('test loss')
+            test_ax.set_ylabel('mAP')
             torch.save(model, f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
         
         plt.close('all')
