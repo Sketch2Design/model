@@ -19,16 +19,21 @@ def train(train_data_loader, model):
     print('Training')
     global train_itr
     global train_loss_list
+
     
     
      # initialize tqdm progress bar
     prog_bar = tqdm(train_data_loader, total=len(train_data_loader))
     
-    for _, data in enumerate(prog_bar):
+    for index, data in enumerate(prog_bar):
         
         optimizer.zero_grad()
         
         images, targets = data
+        
+        #add network graph to tensorboard
+        if epoch == 0 and index == 0:
+            writer.add_graph(model, input_to_model=data[0], verbose=False)
 
         images = list(image.to(DEVICE) for image in images)
         targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
@@ -39,6 +44,10 @@ def train(train_data_loader, model):
         loss_value = losses.item()
         train_loss_list.append(loss_value)
         train_loss_hist.send(loss_value)
+
+        #tensorboard
+        writer.add_scalar("Loss", loss_value, epoch)
+
         losses.backward()
 
         # gradient normalization
@@ -169,6 +178,7 @@ if __name__ == '__main__':
   
     # start the training epochs
     for epoch in range(args.epochs):
+
         print(f"\nEPOCH {epoch+1} of {args.epochs}")
         
         # reset the training and testing loss histories for the current epoch
@@ -222,3 +232,6 @@ if __name__ == '__main__':
             torch.save(model, f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
         
         plt.close('all')
+    
+    #tensorboard flush
+    writer.flush()
