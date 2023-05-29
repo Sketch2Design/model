@@ -7,7 +7,7 @@ import random
 import requests
 from pathlib import Path
 
-import zipfile
+import tarfile
 
 from utils import get_classes
 
@@ -21,9 +21,9 @@ def split():
             f.write(request.content)
 
     # unzip the dataset into dataset/all directory
-    with zipfile.ZipFile(ARCHIVE_FILE_PATH, "r") as zip_ref:
-            print("Unzipping...") 
-            zip_ref.extractall(ALL_DATASET_PATH)
+    with tarfile.open(ARCHIVE_FILE_PATH) as file:
+        print("Unzipping...") 
+        file.extractall(ALL_DATASET_PATH)
 
 
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     parser.add_argument("--split", type=float, required= False, help="Train Test split", default=0.2)
     args = parser.parse_args()
 
-    ARCHIVE_FILE_PATH = os.path.join(args.path, "archive.zip")
+    ARCHIVE_FILE_PATH = os.path.join(args.path, "archive.tar.xz")
     ALL_DATASET_PATH = os.path.join(args.path, "all")
     ANNOTATION_PATH = os.path.join(args.path, "all", "Annotations")
     IMAGE_PATH = os.path.join(args.path, "all", "images")

@@ -1,4 +1,6 @@
 import torch
+from torch.utils.tensorboard import SummaryWriter
+import torchmetrics
 
 import argparse
 import time
@@ -18,6 +20,7 @@ def train(train_data_loader, model):
     global train_itr
     global train_loss_list
     
+    
      # initialize tqdm progress bar
     prog_bar = tqdm(train_data_loader, total=len(train_data_loader))
     
@@ -26,18 +29,19 @@ def train(train_data_loader, model):
         optimizer.zero_grad()
         
         images, targets = data
+
         images = list(image.to(DEVICE) for image in images)
-        
         targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
         
         loss_dict = model(images, targets)
         losses = sum(loss for loss in loss_dict.values())
+        # loss
         loss_value = losses.item()
         train_loss_list.append(loss_value)
         train_loss_hist.send(loss_value)
-        
         losses.backward()
 
+        # gradient normalization
         clipping_value = 1 
         torch.nn.utils.clip_grad_norm(params, clipping_value)
         
@@ -56,7 +60,7 @@ def train(train_data_loader, model):
 def test(test_data_loader, model):
     print('Validating')
     global test_itr
-    global test_loss_list
+    global mAP
     
     # initialize tqdm progress bar
     prog_bar = tqdm(test_data_loader, total=len(test_data_loader))
@@ -67,19 +71,21 @@ def test(test_data_loader, model):
         images = list(image.to(DEVICE) for image in images)
         
         targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
-        
+
+        mAP.reset() 
+
+        model.eval()
         with torch.inference_mode():
-            loss_dict = model(images, targets)
-        losses = sum(loss for loss in loss_dict.values())
-        loss_value = losses.item()
-        test_loss_list.append(loss_value)
-        test_loss_hist.send(loss_value)
+            prediction = model(images)
+        mAP.update(prediction, targets)
         
         test_itr += 1
         # update the loss value beside the progress bar for each iteration
         prog_bar.set_description(desc=f"Loss: {loss_value:.4f} Iter: {test_itr}")
+
+    mean_ap = mAP.compute()
         
-    return test_loss_list
+    return mean_ap
 
 
 if __name__ == '__main__':
@@ -108,6 +114,9 @@ if __name__ == '__main__':
     dname_list.append('test')
     test_path = "/".join(dname_list)
 
+    # tensorboard setup
+    writer = SummaryWriter()
+
     # resize dataset
     RESIZE_TO = 512
     CLASSES = get_classes()
@@ -131,16 +140,23 @@ if __name__ == '__main__':
     
     # define the optimizer
     optimizer = torch.optim.SGD(params, lr=args.lr, momentum=0.9, weight_decay=0.0005)
+    # define the learning rate scheduler
+    warmup_epochs = 7
+    warmup_factor = 0.01
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 40, 60, 80], gamma=0.1)
+    warmup_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda epoch: epoch / warmup_epochs * warmup_factor)
     
     # initialize the Loss store class
     train_loss_hist = Loss()
-    test_loss_hist = Loss()
+
     train_itr = 1
     test_itr = 1
     
     # train and testing loss lists to store loss values of all...
     train_loss_list = []
-    test_loss_list = []
+
+    #metrics initialization
+    mAP = torchmetrics.MeanAveragePrecision()
     
     # name to save the trained model with
     MODEL_NAME = args.model
@@ -166,12 +182,19 @@ if __name__ == '__main__':
         # start timer and carry out training and testing
         start = time.time()
 
+        if epoch < warmup_epochs:
+            # Warm-up phase
+            warmup_scheduler.step(epoch)
+        else:
+            scheduler.step()
 
         train_loss = train(train_loader, model)
-        test_loss = test(test_loader, model)
+        mean_ap = test(test_loader, model)
+
+        writer.add_scalar('mAP', mean_ap, epoch) 
         
         print(f"Epoch #{epoch} train loss: {train_loss_hist.value:.3f}")   
-        print(f"Epoch #{epoch} test loss: {test_loss_hist.value:.3f}")   
+        print(f"Epoch #{epoch} mAP: {mean_ap:.3f}")   
         end = time.time()
         print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
         if (epoch+1) % args.ckpt == 0: # save model after every n epochs
