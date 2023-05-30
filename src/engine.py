@@ -81,15 +81,16 @@ def test(test_data_loader, model):
         model.eval()
         with torch.inference_mode():
             prediction = model(images)
+
         mAP.update(prediction, targets)
         
         test_itr += 1
         # update the loss value beside the progress bar for each iteration
-        prog_bar.set_description(desc=f"mAP: {mAP:.4f} Iter: {test_itr}")
+        prog_bar.set_description(desc=f"Iter: {test_itr}")
 
     mean_ap = mAP.compute()
         
-    return mean_ap
+    return torch.tensor(mean_ap)
 
 
 if __name__ == '__main__':
