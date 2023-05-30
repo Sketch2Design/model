@@ -20,8 +20,7 @@ def train(train_data_loader, model):
     global train_itr
     global train_loss_list
 
-    
-    
+
      # initialize tqdm progress bar
     prog_bar = tqdm(train_data_loader, total=len(train_data_loader))
     
@@ -30,10 +29,6 @@ def train(train_data_loader, model):
         optimizer.zero_grad()
         
         images, targets = data
-        
-        #add network graph to tensorboard
-        if epoch == 0 and index == 0:
-            writer.add_graph(model, input_to_model=data[0], verbose=False)
 
         images = list(image.to(DEVICE) for image in images)
         targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
@@ -150,9 +145,9 @@ if __name__ == '__main__':
     # define the optimizer
     optimizer = torch.optim.SGD(params, lr=args.lr, momentum=0.9, weight_decay=0.0005)
     # define the learning rate scheduler
-    warmup_epochs = 7
-    warmup_factor = 0.01
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 40, 60, 80], gamma=0.1)
+    warmup_epochs = 5
+    warmup_factor = 0.001
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 20], gamma=0.5)
     warmup_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda epoch: epoch / warmup_epochs * warmup_factor)
     
     # initialize the Loss store class
@@ -191,13 +186,13 @@ if __name__ == '__main__':
         # start timer and carry out training and testing
         start = time.time()
 
+        train_loss = train(train_loader, model)
         if epoch < warmup_epochs:
             # Warm-up phase
-            warmup_scheduler.step(epoch)
+            warmup_scheduler.step()
         else:
             scheduler.step()
 
-        train_loss = train(train_loader, model)
         mean_ap = test(test_loader, model)
 
         writer.add_scalar('mAP', mean_ap, epoch) 
