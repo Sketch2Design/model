@@ -148,7 +148,7 @@ if __name__ == '__main__':
     # define the learning rate scheduler
     warmup_epochs = 5
     warmup_factor = 0.001
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 20], gamma=0.5)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10, 20, 30, 40], gamma=0.5)
     warmup_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda epoch: epoch / warmup_epochs * warmup_factor)
     
     # initialize the Loss store class
