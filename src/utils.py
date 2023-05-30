@@ -165,16 +165,6 @@ class Loss:
 def collate_fn(batch):
     return tuple(zip(*batch))
 
-def loader_fn(train, datset, batch):
-    loader = DataLoader(
-        datset,
-        batch_size=batch,
-        shuffle=train,
-        num_workers=2,
-        collate_fn=collate_fn
-    )
-    return loader
-
 # define the training tranforms
 def get_train_transform():
     return A.Compose([
