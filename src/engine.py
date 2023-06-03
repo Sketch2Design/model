@@ -63,7 +63,6 @@ def train(train_data_loader, model):
 def test(test_data_loader, model):
     print('Validating')
     global test_itr
-    global mAP
     
     # initialize tqdm progress bar
     prog_bar = tqdm(test_data_loader, total=len(test_data_loader))
@@ -75,9 +74,6 @@ def test(test_data_loader, model):
         
         targets = [{k: v.to(DEVICE) for k, v in t.items()} for t in targets]
 
-        mAP.reset() 
-
-        model.eval()
         with torch.inference_mode():
             prediction = model(images)
 
@@ -176,6 +172,7 @@ if __name__ == '__main__':
         
         # reset the training and testing loss histories for the current epoch
         train_loss_hist.reset()
+        mAP.reset() 
         
         # create two subplots, one for each, training and testing
         figure_1, train_ax = plt.subplots()
@@ -183,13 +180,14 @@ if __name__ == '__main__':
         # start timer and carry out training and testing
         start = time.time()
 
+        model.train()
         train_loss = train(train_loader, model)
         if epoch < warmup_epochs:
             # Warm-up phase
             warmup_scheduler.step()
         else:
             scheduler.step()
-
+        model.eval()
         mean_ap = test(test_loader, model)
 
         
