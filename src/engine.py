@@ -1,7 +1,7 @@
 import torch
-from torch.utils.tensorboard import SummaryWriter
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 
+from pprint import pprint
 import argparse
 import time
 import os
@@ -41,7 +41,6 @@ def train(train_data_loader, model):
         train_loss_hist.send(loss_value)
 
         #tensorboard
-        writer.add_scalar("Loss", loss_value, epoch)
 
         losses.backward()
 
@@ -90,7 +89,7 @@ def test(test_data_loader, model):
 
     mean_ap = mAP.compute()
         
-    return torch.tensor(mean_ap)
+    return mean_ap
 
 
 if __name__ == '__main__':
@@ -119,8 +118,6 @@ if __name__ == '__main__':
     dname_list.append('test')
     test_path = "/".join(dname_list)
 
-    # tensorboard setup
-    writer = SummaryWriter()
 
     # resize dataset
     RESIZE_TO = 512
@@ -182,7 +179,6 @@ if __name__ == '__main__':
         
         # create two subplots, one for each, training and testing
         figure_1, train_ax = plt.subplots()
-        figure_2, test_ax = plt.subplots()
         
         # start timer and carry out training and testing
         start = time.time()
@@ -196,12 +192,14 @@ if __name__ == '__main__':
 
         mean_ap = test(test_loader, model)
 
-        writer.add_scalar('mAP', mean_ap, epoch) 
         
-        print(f"Epoch #{epoch} train loss: {train_loss_hist.value:.3f}")   
-        print(f"Epoch #{epoch} mAP: {mean_ap:.3f}")   
+        print(f"Epoch #{epoch} train loss: {train_loss_hist.value:.3f}")  
+        print(f"Epoch #{epoch} mAP: ")   
+        pprint(mean_ap)
+
         end = time.time()
         print(f"Took {((end - start) / 60):.3f} minutes for epoch {epoch}")
+        
         if (epoch+1) % args.ckpt == 0: # save model after every n epochs
             torch.save(model, f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
             print('SAVING MODEL COMPLETED...\n')
@@ -210,23 +208,14 @@ if __name__ == '__main__':
             train_ax.plot(train_loss, color='blue')
             train_ax.set_xlabel('iterations')
             train_ax.set_ylabel('train loss')
-            test_ax.plot(mean_ap, color='red')
-            test_ax.set_xlabel('iterations')
-            test_ax.set_ylabel('mAP')
             figure_1.savefig(f"{args.export}/train_loss_{epoch+1}.png")
-            figure_2.savefig(f"{args.export}/test_loss_{epoch+1}.png")
             print('SAVING PLOTS COMPLETE...')
         
         if (epoch+1) == args.epochs: # save loss plots and model once at the end
             train_ax.plot(train_loss, color='blue')
             train_ax.set_xlabel('iterations')
             train_ax.set_ylabel('train loss')
-            test_ax.plot(mean_ap, color='red')
-            test_ax.set_xlabel('iterations')
-            test_ax.set_ylabel('mAP')
             torch.save(model, f"{args.export}/{MODEL_NAME}{epoch+1}.pth")
         
         plt.close('all')
     
-    #tensorboard flush
-    writer.flush()
